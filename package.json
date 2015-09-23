@@ -1,0 +1,18 @@
+{
+  "name": "cordova-plugin-balance-board",
+  "version": "0.0.0",
+  "description": "Cordova plugin to comunicate with the Wii Balance Board ",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrackCurly/cordova-plugin-balance-board.git"
+  },
+  "author": "Paul Sonnentag <Paul.Sonnentag@googlemail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BrackCurly/cordova-plugin-balance-board/issues"
+  },
+  "homepage": "https://github.com/BrackCurly/cordova-plugin-balance-board"
+}

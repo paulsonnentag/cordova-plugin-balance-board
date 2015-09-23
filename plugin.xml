@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="com.paulsonnentag.balanceboard" version="0.0.1">
-  <name>MyPlugin</name>
-  <description>Empty Plugin</description>
-  <keywords></keywords>
+        id="com.paulsonnentag.balanceboard" version="0.0.0">
+  <name>Balance Board</name>
+  <description>Cordova plugin to comunicate with the Wii Balance Board</description>
+  <keywords>balance board, wii, bluetooth</keywords>
 
   <js-module src="www/balanceboard.js" name="balanceBoard">
     <clobbers target="balanceBoard" />  <!-- this puts the plugin in window.myplugin -->
@@ -12,12 +12,17 @@
   <!-- android -->
   <platform name="android">
     <config-file target="res/xml/config.xml" parent="/*">
-      <feature name="BalanceBoard" >
+      <feature name="BalanceBoard">
         <param name="android-package" value="com.paulsonnentag.balanceboard.BalanceBoardPlugin"/>
       </feature>
     </config-file>
-
-    <source-file src="src/android/BalanceBoardPlugin.java" target-dir="src/com/paulsonnentag/balanceboard/" />
+    <config-file target="AndroidManifest.xml" parent="/*">
+      <uses-permission android:name="android.permission.BLUETOOTH"/>
+      <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    </config-file>
+    <source-file src="src/android/BalanceBoardPlugin.java" target-dir="src/com/paulsonnentag/balanceboard/"/>
+    <source-file src="src/android/BalanceBoard.java" target-dir="src/com/paulsonnentag/balanceboard/"/>
+    <source-file src="src/android/WiimoteSocket.java" target-dir="src/com/paulsonnentag/balanceboard/"/>
   </platform>
 
 </plugin>
