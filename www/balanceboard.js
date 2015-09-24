@@ -2,26 +2,22 @@
 
 var noop = function () {}
 
-
-function getEvent (success, error) {
-  cordova.exec(success, error, "BalanceBoard", "getEvent", [])
+function getEvents (callback) {
+  cordova.exec(callback, noop, "BalanceBoard", "getEvents", [])
 }
 
 
-
 function eventLoop () {
-  getEvent(function (event) {
+  getEvents(function (events) {
 
-    if (event !== null) {
+
+    events.forEach(function (event) {
+
       alert(event.type);
-    }
 
-    setTimeout(eventLoop, 1000);
+    });
 
-  }, function () {
-
-    setTimeout(eventLoop, 1000);
-
+    setTimeout(eventLoop, 10);
   });
 }
 

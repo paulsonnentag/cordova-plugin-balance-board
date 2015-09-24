@@ -15,15 +15,16 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import java.lang.Override;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Stack;
+
 
 public class BalanceBoardPlugin extends CordovaPlugin {
 
-    private Stack<JSONObject> events = new Stack<JSONObject>();
+    private JSONArray events = new JSONArray();
     BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
     @Override
@@ -35,18 +36,16 @@ public class BalanceBoardPlugin extends CordovaPlugin {
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         if (action.equals("connect")) {
-            addEvent("startconnect");
             connect();
 
-        } else if (action.equals("getEvent")) {
-            popEvent(callbackContext);
+        } else if (action.equals("getEvents")) {
+            dispatchEvents(callbackContext);
         } else {
             return false;
         }
 
         return true;
     }
-
 
     private void connect () {
         if(!bluetoothAdapter.isEnabled()) {
@@ -58,26 +57,23 @@ public class BalanceBoardPlugin extends CordovaPlugin {
         }
     }
 
-    private void addEvent (String type, JSONObject data) {
+    private void recordEvent (String type, JSONObject data) {
         try {
             JSONObject event = new JSONObject();
             event.put("type", type);
             event.put("data", data);
-            events.push(event);
+            events.put(event);
 
         } catch (JSONException e) {}
     }
 
-    private void popEvent (CallbackContext callbackContext) {
-        if (events.empty()) {
-            callbackContext.error("NO_EVENT");
-        } else {
-            callbackContext.success(events.pop());
-        }
+    private void recordEvent (String type) {
+        recordEvent(type, new JSONObject());
     }
 
-    private void addEvent(String type) {
-        addEvent(type, new JSONObject());
+    private void dispatchEvents (CallbackContext callbackContext) {
+        callbackContext.success(events);
+        events = new JSONArray();
     }
 
     private final BroadcastReceiver bcReceiver = new BroadcastReceiver() {
@@ -90,13 +86,13 @@ public class BalanceBoardPlugin extends CordovaPlugin {
 
 
                 //if (balanceBoard == null) {
-                    addEvent("discovered");
+                    recordEvent("discovered");
                     //initBalanceBoard(device);
                     bluetoothAdapter.cancelDiscovery();
                 //}
 
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                connect();
+                //connect();
             }
         }
     };
