@@ -5,8 +5,11 @@
   <description>Cordova plugin to comunicate with the Wii Balance Board</description>
   <keywords>balance board, wii, bluetooth</keywords>
 
+  <js-module src="www/EventEmitter.js" name="EventEmitter">
+    <clobbers target="EventEmitter"/>
+  </js-module>
   <js-module src="www/balanceboard.js" name="balanceBoard">
-    <clobbers target="balanceBoard" />  <!-- this puts the plugin in window.myplugin -->
+    <clobbers target="balanceBoard"/>
   </js-module>
 
   <!-- android -->
