@@ -20,12 +20,15 @@ import android.util.Log;
 import java.lang.Override;
 import java.util.Collection;
 import java.util.Collections;
-
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class BalanceBoardPlugin extends CordovaPlugin {
 
+    private Lock eventLock = new ReentrantLock();
     private JSONArray events = new JSONArray();
-    BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private BalanceBoard balanceBoard;
 
     @Override
     public void initialize (CordovaInterface cordova, CordovaWebView webView) {
@@ -58,6 +61,8 @@ public class BalanceBoardPlugin extends CordovaPlugin {
     }
 
     private void recordEvent (String type, JSONObject data) {
+        eventLock.lock();
+
         try {
             JSONObject event = new JSONObject();
             event.put("type", type);
@@ -65,6 +70,8 @@ public class BalanceBoardPlugin extends CordovaPlugin {
             events.put(event);
 
         } catch (JSONException e) {}
+
+        eventLock.unlock();
     }
 
     private void recordEvent (String type) {
@@ -72,8 +79,12 @@ public class BalanceBoardPlugin extends CordovaPlugin {
     }
 
     private void dispatchEvents (CallbackContext callbackContext) {
+        eventLock.lock();
+
         callbackContext.success(events);
         events = new JSONArray();
+
+        eventLock.unlock();
     }
 
     private final BroadcastReceiver bcReceiver = new BroadcastReceiver() {
@@ -84,16 +95,56 @@ public class BalanceBoardPlugin extends CordovaPlugin {
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-
-                //if (balanceBoard == null) {
+                if (balanceBoard == null) {
                     recordEvent("discovered");
-                    //initBalanceBoard(device);
+                    balanceBoard = new BalanceBoard(bluetoothAdapter, device, wmListener);
                     bluetoothAdapter.cancelDiscovery();
-                //}
+                }
 
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                //connect();
+                if (balanceBoard == null) {
+                    connect();
+                }
             }
+        }
+    };
+
+    private final BalanceBoard.Listener wmListener = new BalanceBoard.Listener() {
+        @Override
+        public void onWiimoteConnecting(BalanceBoard wm)
+        {
+            recordEvent("connecting");
+        }
+
+        @Override
+        public void onWiimoteConnected(BalanceBoard wm)
+        {
+            recordEvent("connected");
+        }
+
+        @Override
+        public void onWiimoteDisconnected(BalanceBoard wm)
+        {
+            recordEvent("disconnected");
+            balanceBoard = null;
+        }
+
+        @Override
+        public void onWiimoteLEDChange(BalanceBoard wm) { }
+
+        @Override
+        public void onWiimoteData(BalanceBoard wm, BalanceBoard.Data data)
+        {
+            try {
+                JSONObject eventData = new JSONObject();
+                eventData.put("topLeft", data.getTopLeft());
+                eventData.put("topRight", data.getTopRight());
+                eventData.put("bottomRight", data.getBottomRight());
+                eventData.put("bottomLeft", data.getBottomLeft());
+
+                recordEvent("data", eventData);
+
+            } catch (JSONException e) {};
         }
     };
 }
