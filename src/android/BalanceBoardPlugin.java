@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class BalanceBoardPlugin extends CordovaPlugin {
 
+    private boolean discovering = false;
     private Lock eventLock = new ReentrantLock();
     private JSONArray events = new JSONArray();
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -41,13 +42,29 @@ public class BalanceBoardPlugin extends CordovaPlugin {
         if (action.equals("connect")) {
             connect();
 
+        } else if (action.equals("disconnect")) {
+            disconnect();
+
         } else if (action.equals("getEvents")) {
-            dispatchEvents(callbackContext);
+                dispatchEvents(callbackContext);
+
         } else {
             return false;
         }
 
         return true;
+    }
+
+    private void disconnect () {
+        if(bluetoothAdapter.isDiscovering()) {
+            bluetoothAdapter.cancelDiscovery();
+            discovering = false;
+        }
+
+        if (balanceBoard != null) {
+            balanceBoard.disconnect();
+            balanceBoard = null;
+        }
     }
 
     private void connect () {
@@ -58,6 +75,8 @@ public class BalanceBoardPlugin extends CordovaPlugin {
         if(!bluetoothAdapter.isDiscovering()) {
             bluetoothAdapter.startDiscovery();
         }
+
+        discovering = true;
     }
 
     private void recordEvent (String type, JSONObject data) {
@@ -99,10 +118,11 @@ public class BalanceBoardPlugin extends CordovaPlugin {
                     recordEvent("discovered");
                     balanceBoard = new BalanceBoard(bluetoothAdapter, device, wmListener);
                     bluetoothAdapter.cancelDiscovery();
+                    discovering = false;
                 }
 
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                if (balanceBoard == null) {
+                if (discovering == true) {
                     connect();
                 }
             }

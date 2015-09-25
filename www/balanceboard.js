@@ -23,8 +23,14 @@ document.addEventListener('deviceready', eventLoop, false);
 
 balanceBoard.connect = function () {
   cordova.exec(noop, function (err) {
-    alert('err connect');
+    console.log('error connect', err);
   }, 'BalanceBoard', 'connect', [])
 };
+
+balanceBoard.disconnect = function () {
+  cordova.exec(noop, function (err) {
+    console.log('err disconnect', err);
+  }, 'BalanceBoard', 'disconnect', [])
+}
 
 module.exports = balanceBoard;
