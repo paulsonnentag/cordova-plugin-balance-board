@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
-        id="com.paulsonnentag.balanceboard" version="0.0.0">
+        id="com.paulsonnentag.balanceboard" version="1.0.0">
   <name>Balance Board</name>
   <description>Cordova plugin to comunicate with the Wii Balance Board</description>
   <keywords>balance board, wii, bluetooth</keywords>
