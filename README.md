@@ -7,7 +7,7 @@ This is just a small wrapper around the bluetooth communication code of the [fit
 ## Instalation
 
 ```bash
-corodova plugin add https://github.com/BrackCurly/cordova-plugin-balance-board.git
+cordova plugin add https://github.com/BrackCurly/cordova-plugin-balance-board.git
 ```
 
 ## Usage
